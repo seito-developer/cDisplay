@@ -6,73 +6,103 @@ final class MenuBuilder {
 
     // MARK: - Callbacks
 
-    var onToggleResolution: (() -> Void)?
-    var onSelectResolution: ((DisplayMode) -> Void)?
+    var onToggle: (() -> Void)?
+    var onSelectAspectRatio: ((AspectRatio) -> Void)?
+    var onSelectResolution: ((DisplayMode, AspectRatio) -> Void)?
     var onQuit: (() -> Void)?
 
     // MARK: - Build
 
     func buildMenu(
-        isResolutionChanged: Bool,
-        activeMode: DisplayMode?,
-        modeGroups: [DisplayModeGroup],
+        isActive: Bool,
+        activeMethod: DisplayMethod?,
+        modesForRatio: (AspectRatio) -> [DisplayMode],
         nativeWidth: Int,
         nativeHeight: Int
     ) -> NSMenu {
         let menu = NSMenu()
 
-        // 1. Toggle resolution
-        let toggleTitle = isResolutionChanged ? "Disable Resolution" : "Enable Resolution"
+        // 1. Toggle
+        let toggleTitle = isActive ? "Disable" : "Enable"
         let toggleItem = NSMenuItem(title: toggleTitle, action: #selector(toggleAction(_:)), keyEquivalent: "")
         toggleItem.target = self
-        if !isResolutionChanged && activeMode == nil {
-            // No mode selected yet — disable toggle until user picks one
-        }
         menu.addItem(toggleItem)
 
         menu.addItem(.separator())
 
-        // 2. Resolution submenu grouped by aspect ratio
-        let resItem = NSMenuItem(title: "Resolution", action: nil, keyEquivalent: "")
-        let resMenu = NSMenu()
+        // 2. Aspect Ratio submenu
+        let arItem = NSMenuItem(title: "Aspect Ratio", action: nil, keyEquivalent: "")
+        let arMenu = NSMenu()
 
-        for group in modeGroups {
-            // Section header
-            let header = NSMenuItem(title: group.label, action: nil, keyEquivalent: "")
-            header.isEnabled = false
-            resMenu.addItem(header)
+        for ar in AspectRatio.allCases {
+            let modes = modesForRatio(ar)
 
-            for mode in group.modes {
-                var title = mode.displayName
-                if mode.width == nativeWidth && mode.height == nativeHeight {
-                    title += " (native)"
-                }
-                let item = NSMenuItem(title: "    " + title, action: #selector(selectResolutionAction(_:)), keyEquivalent: "")
+            if modes.isEmpty {
+                // No matching resolution — single item, applies mask
+                let item = NSMenuItem(title: ar.displayName + " (mask)", action: #selector(selectAspectRatioAction(_:)), keyEquivalent: "")
                 item.target = self
-                item.representedObject = ModeWrapper(mode: mode)
-                if let active = activeMode, active == mode {
+                item.representedObject = ARWrapper(aspectRatio: ar)
+                if case .mask(let activeAR) = activeMethod, activeAR == ar {
                     item.state = .on
                 }
-                resMenu.addItem(item)
+                arMenu.addItem(item)
+            } else {
+                // Has matching resolutions — submenu
+                let groupItem = NSMenuItem(title: ar.displayName, action: nil, keyEquivalent: "")
+                let groupMenu = NSMenu()
+
+                for mode in modes {
+                    var title = mode.displayName
+                    if mode.width == nativeWidth && mode.height == nativeHeight {
+                        title += " (native)"
+                    }
+                    let mItem = NSMenuItem(title: title, action: #selector(selectResolutionAction(_:)), keyEquivalent: "")
+                    mItem.target = self
+                    mItem.representedObject = ModeARWrapper(mode: mode, aspectRatio: ar)
+                    if case .resolution(let activeMode) = activeMethod, activeMode == mode {
+                        mItem.state = .on
+                    }
+                    groupMenu.addItem(mItem)
+                }
+
+                // Also add mask option as fallback
+                let maskItem = NSMenuItem(title: "Mask overlay", action: #selector(selectAspectRatioAction(_:)), keyEquivalent: "")
+                maskItem.target = self
+                maskItem.representedObject = ARWrapper(aspectRatio: ar)
+                if case .mask(let activeAR) = activeMethod, activeAR == ar {
+                    maskItem.state = .on
+                }
+                groupMenu.addItem(.separator())
+                groupMenu.addItem(maskItem)
+
+                groupItem.submenu = groupMenu
+                arMenu.addItem(groupItem)
             }
         }
 
-        resItem.submenu = resMenu
-        menu.addItem(resItem)
+        arItem.submenu = arMenu
+        menu.addItem(arItem)
 
         menu.addItem(.separator())
 
         // 3. Display info
         let nativeItem = NSMenuItem(
-            title: "Display: \(nativeWidth) × \(nativeHeight) (native)",
+            title: "Display: \(nativeWidth) × \(nativeHeight)",
             action: nil, keyEquivalent: ""
         )
         nativeItem.isEnabled = false
         menu.addItem(nativeItem)
 
-        if let active = activeMode {
+        if case .resolution(let mode) = activeMethod {
             let activeItem = NSMenuItem(
-                title: "Active: \(active.width) × \(active.height)",
+                title: "Active: \(mode.width) × \(mode.height)",
+                action: nil, keyEquivalent: ""
+            )
+            activeItem.isEnabled = false
+            menu.addItem(activeItem)
+        } else if case .mask(let ar) = activeMethod {
+            let activeItem = NSMenuItem(
+                title: "Active: \(ar.displayName) (mask)",
                 action: nil, keyEquivalent: ""
             )
             activeItem.isEnabled = false
@@ -99,12 +129,17 @@ final class MenuBuilder {
     // MARK: - Actions
 
     @objc private func toggleAction(_ sender: NSMenuItem) {
-        onToggleResolution?()
+        onToggle?()
+    }
+
+    @objc private func selectAspectRatioAction(_ sender: NSMenuItem) {
+        guard let wrapper = sender.representedObject as? ARWrapper else { return }
+        onSelectAspectRatio?(wrapper.aspectRatio)
     }
 
     @objc private func selectResolutionAction(_ sender: NSMenuItem) {
-        guard let wrapper = sender.representedObject as? ModeWrapper else { return }
-        onSelectResolution?(wrapper.mode)
+        guard let wrapper = sender.representedObject as? ModeARWrapper else { return }
+        onSelectResolution?(wrapper.mode, wrapper.aspectRatio)
     }
 
     @objc private func quitAction(_ sender: NSMenuItem) {
@@ -112,8 +147,18 @@ final class MenuBuilder {
     }
 }
 
-/// Wraps DisplayMode for use as NSMenuItem.representedObject (must be AnyObject).
-private final class ModeWrapper: NSObject {
+// MARK: - Wrappers for representedObject
+
+private final class ARWrapper: NSObject {
+    let aspectRatio: AspectRatio
+    init(aspectRatio: AspectRatio) { self.aspectRatio = aspectRatio }
+}
+
+private final class ModeARWrapper: NSObject {
     let mode: DisplayMode
-    init(mode: DisplayMode) { self.mode = mode }
+    let aspectRatio: AspectRatio
+    init(mode: DisplayMode, aspectRatio: AspectRatio) {
+        self.mode = mode
+        self.aspectRatio = aspectRatio
+    }
 }

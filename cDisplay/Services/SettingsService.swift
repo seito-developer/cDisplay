@@ -9,8 +9,9 @@ final class SettingsService {
     // MARK: - Keys
 
     private enum Key {
-        static let selectedModeID   = "selectedModeID"
-        static let keyboardShortcut = "keyboardShortcut"
+        static let selectedAspectRatio = "selectedAspectRatio"
+        static let selectedModeID      = "selectedModeID"
+        static let keyboardShortcut    = "keyboardShortcut"
     }
 
     // MARK: - Defaults
@@ -21,6 +22,25 @@ final class SettingsService {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+    }
+
+    // MARK: - Selected Aspect Ratio
+
+    var selectedAspectRatio: AspectRatio? {
+        get {
+            guard let raw = defaults.string(forKey: Key.selectedAspectRatio),
+                  let value = AspectRatio(rawValue: raw) else {
+                return nil
+            }
+            return value
+        }
+        set {
+            if let value = newValue {
+                defaults.set(value.rawValue, forKey: Key.selectedAspectRatio)
+            } else {
+                defaults.removeObject(forKey: Key.selectedAspectRatio)
+            }
+        }
     }
 
     // MARK: - Selected Mode ID
@@ -52,7 +72,7 @@ final class SettingsService {
     // MARK: - Reset
 
     func reset() {
-        [Key.selectedModeID, Key.keyboardShortcut].forEach {
+        [Key.selectedAspectRatio, Key.selectedModeID, Key.keyboardShortcut].forEach {
             defaults.removeObject(forKey: $0)
         }
     }

@@ -177,6 +177,30 @@ final class DisplayModeService {
         defaults.removeObject(forKey: crashRecoveryModeIDKey)
     }
 
+    // MARK: - Aspect Ratio Matching
+
+    /// Returns display modes matching the given aspect ratio (within tolerance).
+    func modesMatching(aspectRatio: AspectRatio) -> [DisplayMode] {
+        let target = aspectRatio.ratio
+        let tolerance = 0.02
+        let groups = availableModeGroups()
+        var matches: [DisplayMode] = []
+        for group in groups {
+            for mode in group.modes {
+                let modeRatio = Double(mode.width) / Double(mode.height)
+                if abs(modeRatio - target) < tolerance {
+                    matches.append(mode)
+                }
+            }
+        }
+        return matches.sorted { $0.width > $1.width }
+    }
+
+    /// Returns true if at least one display mode matches the given aspect ratio.
+    func hasMatchingMode(for aspectRatio: AspectRatio) -> Bool {
+        !modesMatching(aspectRatio: aspectRatio).isEmpty
+    }
+
     // MARK: - Helpers
 
     private func aspectRatioLabel(width: Int, height: Int) -> String {

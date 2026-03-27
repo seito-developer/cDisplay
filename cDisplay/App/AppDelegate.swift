@@ -17,7 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Dock icon click → toggle resolution
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        statusBarController?.toggleResolution()
+        statusBarController?.toggle()
         return false
     }
 }
