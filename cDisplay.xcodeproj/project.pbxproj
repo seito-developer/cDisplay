@@ -19,6 +19,8 @@
 		AA0A000000000000000000AA /* DisplayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000EA /* DisplayService.swift */; };
 		AA0A000000000000000000BA /* SettingsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000FA /* SettingsServiceTests.swift */; };
 		AA0A000000000000000000CA /* DisplayServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000010A /* DisplayServiceTests.swift */; };
+		AA0A000000000000000000DA /* MaskPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000011A /* MaskPanelView.swift */; };
+		AA0A000000000000000000EA /* MaskOverlayPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000012A /* MaskOverlayPanel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,8 @@
 		AA01000000000000000000EA /* DisplayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayService.swift; sourceTree = "<group>"; };
 		AA01000000000000000000FA /* SettingsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsServiceTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000010A /* DisplayServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayServiceTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000011A /* MaskPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskPanelView.swift; sourceTree = "<group>"; };
+		AA010000000000000000012A /* MaskOverlayPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskOverlayPanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +126,8 @@
 		AA03000000000000000000AA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AA010000000000000000011A /* MaskPanelView.swift */,
+				AA010000000000000000012A /* MaskOverlayPanel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -285,6 +291,8 @@
 				AA0A0000000000000000008A /* DisplayInfo.swift in Sources */,
 				AA0A0000000000000000009A /* SettingsService.swift in Sources */,
 				AA0A000000000000000000AA /* DisplayService.swift in Sources */,
+				AA0A000000000000000000DA /* MaskPanelView.swift in Sources */,
+				AA0A000000000000000000EA /* MaskOverlayPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
