@@ -11,11 +11,7 @@
       "Bash(jq:*)",
       "Bash(xcodebuild -scheme cDisplay -configuration Debug build)",
       "Bash(xcodebuild -scheme cDisplay -configuration Debug -destination 'platform=macOS' build)",
-      "Bash(xcodebuild test:*)",
-      "Bash(xcodebuild -scheme cDisplay -configuration Debug -destination 'platform=macOS' build CONFIGURATION_BUILD_DIR=/tmp/cDisplay-build)",
-      "Bash(open /tmp/cDisplay-build/cDisplay.app)",
-      "Bash(osascript -e 'tell application \"\"System Events\"\" to \\(name of every window of process \"\"cDisplay\"\"\\)')",
-      "Bash(kill 6984)"
+      "Bash(gh pr:*)"
     ]
   },
   "hooks": {
