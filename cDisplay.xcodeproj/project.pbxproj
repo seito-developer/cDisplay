@@ -23,6 +23,8 @@
 		AA0A000000000000000000EA /* MaskOverlayPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000012A /* MaskOverlayPanel.swift */; };
 		AA0A000000000000000000FA /* MaskViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000013A /* MaskViewModel.swift */; };
 		AA0A00000000000000000100 /* MaskService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000014A /* MaskService.swift */; };
+		AA0A00000000000000000110 /* MenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000015A /* MenuBuilder.swift */; };
+		AA0A00000000000000000120 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000016A /* StatusBarController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,8 @@
 		AA010000000000000000012A /* MaskOverlayPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskOverlayPanel.swift; sourceTree = "<group>"; };
 		AA010000000000000000013A /* MaskViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskViewModel.swift; sourceTree = "<group>"; };
 		AA010000000000000000014A /* MaskService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskService.swift; sourceTree = "<group>"; };
+		AA010000000000000000015A /* MenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBuilder.swift; sourceTree = "<group>"; };
+		AA010000000000000000016A /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +144,8 @@
 		AA03000000000000000000BA /* Menu */ = {
 			isa = PBXGroup;
 			children = (
+				AA010000000000000000015A /* MenuBuilder.swift */,
+				AA010000000000000000016A /* StatusBarController.swift */,
 			);
 			path = Menu;
 			sourceTree = "<group>";
@@ -301,6 +307,8 @@
 				AA0A000000000000000000EA /* MaskOverlayPanel.swift in Sources */,
 				AA0A000000000000000000FA /* MaskViewModel.swift in Sources */,
 				AA0A00000000000000000100 /* MaskService.swift in Sources */,
+				AA0A00000000000000000110 /* MenuBuilder.swift in Sources */,
+				AA0A00000000000000000120 /* StatusBarController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
