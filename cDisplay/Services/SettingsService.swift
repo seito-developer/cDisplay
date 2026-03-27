@@ -9,19 +9,12 @@ final class SettingsService {
     // MARK: - Keys
 
     private enum Key {
-        static let aspectRatio      = "aspectRatio"
-        static let offsetPosition   = "offsetPosition"
-        static let clickMode        = "clickMode"
-        static let showGuideline    = "showGuideline"
+        static let selectedModeID   = "selectedModeID"
         static let keyboardShortcut = "keyboardShortcut"
     }
 
     // MARK: - Defaults
 
-    static let defaultAspectRatio      = AspectRatio.widescreen
-    static let defaultOffsetPosition   = OffsetPosition.center
-    static let defaultClickMode        = ClickMode.passthrough
-    static let defaultShowGuideline    = false
     static let defaultKeyboardShortcut = "⌃⌥⌘M"
 
     // MARK: - Init
@@ -30,54 +23,21 @@ final class SettingsService {
         self.defaults = defaults
     }
 
-    // MARK: - AspectRatio
+    // MARK: - Selected Mode ID
 
-    var aspectRatio: AspectRatio {
+    var selectedModeID: Int32? {
         get {
-            guard let raw = defaults.string(forKey: Key.aspectRatio),
-                  let value = AspectRatio(rawValue: raw) else {
-                return Self.defaultAspectRatio
+            defaults.object(forKey: Key.selectedModeID) == nil
+                ? nil
+                : Int32(defaults.integer(forKey: Key.selectedModeID))
+        }
+        set {
+            if let value = newValue {
+                defaults.set(Int(value), forKey: Key.selectedModeID)
+            } else {
+                defaults.removeObject(forKey: Key.selectedModeID)
             }
-            return value
         }
-        set { defaults.set(newValue.rawValue, forKey: Key.aspectRatio) }
-    }
-
-    // MARK: - OffsetPosition
-
-    var offsetPosition: OffsetPosition {
-        get {
-            guard let raw = defaults.string(forKey: Key.offsetPosition),
-                  let value = OffsetPosition(rawValue: raw) else {
-                return Self.defaultOffsetPosition
-            }
-            return value
-        }
-        set { defaults.set(newValue.rawValue, forKey: Key.offsetPosition) }
-    }
-
-    // MARK: - ClickMode
-
-    var clickMode: ClickMode {
-        get {
-            guard let raw = defaults.string(forKey: Key.clickMode),
-                  let value = ClickMode(rawValue: raw) else {
-                return Self.defaultClickMode
-            }
-            return value
-        }
-        set { defaults.set(newValue.rawValue, forKey: Key.clickMode) }
-    }
-
-    // MARK: - Show Guideline
-
-    var showGuideline: Bool {
-        get {
-            defaults.object(forKey: Key.showGuideline) == nil
-                ? Self.defaultShowGuideline
-                : defaults.bool(forKey: Key.showGuideline)
-        }
-        set { defaults.set(newValue, forKey: Key.showGuideline) }
     }
 
     // MARK: - Keyboard Shortcut
@@ -92,8 +52,7 @@ final class SettingsService {
     // MARK: - Reset
 
     func reset() {
-        [Key.aspectRatio, Key.offsetPosition, Key.clickMode,
-         Key.showGuideline, Key.keyboardShortcut].forEach {
+        [Key.selectedModeID, Key.keyboardShortcut].forEach {
             defaults.removeObject(forKey: $0)
         }
     }

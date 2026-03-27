@@ -7,7 +7,6 @@ final class SettingsServiceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Use a throwaway suite so tests never touch real UserDefaults
         let defaults = UserDefaults(suiteName: "SettingsServiceTests")!
         defaults.removePersistentDomain(forName: "SettingsServiceTests")
         sut = SettingsService(defaults: defaults)
@@ -20,46 +19,25 @@ final class SettingsServiceTests: XCTestCase {
 
     // MARK: - Default values
 
-    func testDefaultAspectRatio() {
-        XCTAssertEqual(sut.aspectRatio, .widescreen)
-    }
-
-    func testDefaultOffsetPosition() {
-        XCTAssertEqual(sut.offsetPosition, .center)
-    }
-
-    func testDefaultClickMode() {
-        XCTAssertEqual(sut.clickMode, .passthrough)
-    }
-
-    func testDefaultShowGuideline() {
-        XCTAssertFalse(sut.showGuideline)
+    func testDefaultSelectedModeID() {
+        XCTAssertNil(sut.selectedModeID)
     }
 
     func testDefaultKeyboardShortcut() {
         XCTAssertEqual(sut.keyboardShortcut, "⌃⌥⌘M")
     }
 
-    // MARK: - Persistence (write → read)
+    // MARK: - Persistence
 
-    func testPersistAspectRatio() {
-        sut.aspectRatio = .vertical
-        XCTAssertEqual(sut.aspectRatio, .vertical)
+    func testPersistSelectedModeID() {
+        sut.selectedModeID = 42
+        XCTAssertEqual(sut.selectedModeID, 42)
     }
 
-    func testPersistOffsetPosition() {
-        sut.offsetPosition = .top
-        XCTAssertEqual(sut.offsetPosition, .top)
-    }
-
-    func testPersistClickMode() {
-        sut.clickMode = .blocking
-        XCTAssertEqual(sut.clickMode, .blocking)
-    }
-
-    func testPersistShowGuideline() {
-        sut.showGuideline = true
-        XCTAssertTrue(sut.showGuideline)
+    func testClearSelectedModeID() {
+        sut.selectedModeID = 42
+        sut.selectedModeID = nil
+        XCTAssertNil(sut.selectedModeID)
     }
 
     func testPersistKeyboardShortcut() {
@@ -70,18 +48,12 @@ final class SettingsServiceTests: XCTestCase {
     // MARK: - Reset
 
     func testResetRestoresDefaults() {
-        sut.aspectRatio    = .square
-        sut.offsetPosition = .bottom
-        sut.clickMode      = .blocking
-        sut.showGuideline  = true
+        sut.selectedModeID = 99
         sut.keyboardShortcut = "⌃⌥M"
 
         sut.reset()
 
-        XCTAssertEqual(sut.aspectRatio,    .widescreen)
-        XCTAssertEqual(sut.offsetPosition, .center)
-        XCTAssertEqual(sut.clickMode,      .passthrough)
-        XCTAssertFalse(sut.showGuideline)
+        XCTAssertNil(sut.selectedModeID)
         XCTAssertEqual(sut.keyboardShortcut, "⌃⌥⌘M")
     }
 }

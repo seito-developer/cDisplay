@@ -1,115 +1,93 @@
 import AppKit
 
-/// Builds and updates the NSMenu for the status bar dropdown.
+/// Builds the NSMenu for the status bar dropdown.
 @MainActor
 final class MenuBuilder {
 
     // MARK: - Callbacks
 
-    var onToggleMask: (() -> Void)?
-    var onSelectAspectRatio: ((AspectRatio) -> Void)?
-    var onSelectOffset: ((OffsetPosition) -> Void)?
-    var onSelectClickMode: ((ClickMode) -> Void)?
-    var onToggleGuideline: (() -> Void)?
+    var onToggleResolution: (() -> Void)?
+    var onSelectResolution: ((DisplayMode) -> Void)?
     var onQuit: (() -> Void)?
 
     // MARK: - Build
 
     func buildMenu(
-        isMaskEnabled: Bool,
-        aspectRatio: AspectRatio,
-        offset: OffsetPosition,
-        clickMode: ClickMode,
-        showGuideline: Bool,
-        displayInfo: DisplayInfo?,
-        displayRect: CGRect
+        isResolutionChanged: Bool,
+        activeMode: DisplayMode?,
+        modeGroups: [DisplayModeGroup],
+        nativeWidth: Int,
+        nativeHeight: Int
     ) -> NSMenu {
         let menu = NSMenu()
 
-        // 1. Mask ON/OFF toggle
-        let toggleTitle = isMaskEnabled ? "Disable Mask" : "Enable Mask"
-        let toggleItem = NSMenuItem(title: toggleTitle, action: #selector(toggleMaskAction(_:)), keyEquivalent: "")
+        // 1. Toggle resolution
+        let toggleTitle = isResolutionChanged ? "Disable Resolution" : "Enable Resolution"
+        let toggleItem = NSMenuItem(title: toggleTitle, action: #selector(toggleAction(_:)), keyEquivalent: "")
         toggleItem.target = self
+        if !isResolutionChanged && activeMode == nil {
+            // No mode selected yet — disable toggle until user picks one
+        }
         menu.addItem(toggleItem)
 
         menu.addItem(.separator())
 
-        // 2. Aspect Ratio submenu
-        let ratioItem = NSMenuItem(title: "Aspect Ratio", action: nil, keyEquivalent: "")
-        let ratioMenu = NSMenu()
-        for ar in AspectRatio.allCases {
-            let item = NSMenuItem(title: ar.displayName, action: #selector(selectAspectRatioAction(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = ar
-            item.state = (ar == aspectRatio) ? .on : .off
-            ratioMenu.addItem(item)
-        }
-        ratioItem.submenu = ratioMenu
-        menu.addItem(ratioItem)
+        // 2. Resolution submenu grouped by aspect ratio
+        let resItem = NSMenuItem(title: "Resolution", action: nil, keyEquivalent: "")
+        let resMenu = NSMenu()
 
-        // 3. Offset Position submenu
-        let offsetItem = NSMenuItem(title: "Position", action: nil, keyEquivalent: "")
-        let offsetMenu = NSMenu()
-        for pos in OffsetPosition.allCases {
-            let item = NSMenuItem(title: pos.displayName, action: #selector(selectOffsetAction(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = pos
-            item.state = (pos == offset) ? .on : .off
-            offsetMenu.addItem(item)
-        }
-        offsetItem.submenu = offsetMenu
-        menu.addItem(offsetItem)
+        for group in modeGroups {
+            // Section header
+            let header = NSMenuItem(title: group.label, action: nil, keyEquivalent: "")
+            header.isEnabled = false
+            resMenu.addItem(header)
 
-        // 4. Click Mode submenu
-        let clickItem = NSMenuItem(title: "Click Mode", action: nil, keyEquivalent: "")
-        let clickMenu = NSMenu()
-        for mode in ClickMode.allCases {
-            let item = NSMenuItem(title: mode.displayName, action: #selector(selectClickModeAction(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = mode
-            item.state = (mode == clickMode) ? .on : .off
-            clickMenu.addItem(item)
+            for mode in group.modes {
+                var title = mode.displayName
+                if mode.width == nativeWidth && mode.height == nativeHeight {
+                    title += " (native)"
+                }
+                let item = NSMenuItem(title: "    " + title, action: #selector(selectResolutionAction(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = ModeWrapper(mode: mode)
+                if let active = activeMode, active == mode {
+                    item.state = .on
+                }
+                resMenu.addItem(item)
+            }
         }
-        clickItem.submenu = clickMenu
-        menu.addItem(clickItem)
 
-        // 5. Guideline toggle
-        let guideItem = NSMenuItem(title: "Show Guideline", action: #selector(toggleGuidelineAction(_:)), keyEquivalent: "")
-        guideItem.target = self
-        guideItem.state = showGuideline ? .on : .off
-        menu.addItem(guideItem)
+        resItem.submenu = resMenu
+        menu.addItem(resItem)
 
         menu.addItem(.separator())
 
-        // 6. Display info (mask ON only)
-        if isMaskEnabled, let info = displayInfo {
-            let screenSize = info.screenSize
-            let screenItem = NSMenuItem(
-                title: "Display: \(Int(screenSize.width))×\(Int(screenSize.height))",
+        // 3. Display info
+        let nativeItem = NSMenuItem(
+            title: "Display: \(nativeWidth) × \(nativeHeight) (native)",
+            action: nil, keyEquivalent: ""
+        )
+        nativeItem.isEnabled = false
+        menu.addItem(nativeItem)
+
+        if let active = activeMode {
+            let activeItem = NSMenuItem(
+                title: "Active: \(active.width) × \(active.height)",
                 action: nil, keyEquivalent: ""
             )
-            screenItem.isEnabled = false
-            menu.addItem(screenItem)
-
-            if displayRect != .zero {
-                let areaItem = NSMenuItem(
-                    title: "Visible: \(Int(displayRect.width))×\(Int(displayRect.height))",
-                    action: nil, keyEquivalent: ""
-                )
-                areaItem.isEnabled = false
-                menu.addItem(areaItem)
-            }
-
-            menu.addItem(.separator())
+            activeItem.isEnabled = false
+            menu.addItem(activeItem)
         }
 
-        // 7. Version
+        menu.addItem(.separator())
+
+        // 4. Version
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–"
         let versionItem = NSMenuItem(title: "Version \(version)", action: nil, keyEquivalent: "")
         versionItem.isEnabled = false
         menu.addItem(versionItem)
 
-        // 8. Quit
+        // 5. Quit
         menu.addItem(.separator())
         let quitItem = NSMenuItem(title: "Quit cDisplay", action: #selector(quitAction(_:)), keyEquivalent: "q")
         quitItem.target = self
@@ -120,30 +98,22 @@ final class MenuBuilder {
 
     // MARK: - Actions
 
-    @objc private func toggleMaskAction(_ sender: NSMenuItem) {
-        onToggleMask?()
+    @objc private func toggleAction(_ sender: NSMenuItem) {
+        onToggleResolution?()
     }
 
-    @objc private func selectAspectRatioAction(_ sender: NSMenuItem) {
-        guard let ar = sender.representedObject as? AspectRatio else { return }
-        onSelectAspectRatio?(ar)
-    }
-
-    @objc private func selectOffsetAction(_ sender: NSMenuItem) {
-        guard let pos = sender.representedObject as? OffsetPosition else { return }
-        onSelectOffset?(pos)
-    }
-
-    @objc private func selectClickModeAction(_ sender: NSMenuItem) {
-        guard let mode = sender.representedObject as? ClickMode else { return }
-        onSelectClickMode?(mode)
-    }
-
-    @objc private func toggleGuidelineAction(_ sender: NSMenuItem) {
-        onToggleGuideline?()
+    @objc private func selectResolutionAction(_ sender: NSMenuItem) {
+        guard let wrapper = sender.representedObject as? ModeWrapper else { return }
+        onSelectResolution?(wrapper.mode)
     }
 
     @objc private func quitAction(_ sender: NSMenuItem) {
         onQuit?()
     }
+}
+
+/// Wraps DisplayMode for use as NSMenuItem.representedObject (must be AnyObject).
+private final class ModeWrapper: NSObject {
+    let mode: DisplayMode
+    init(mode: DisplayMode) { self.mode = mode }
 }

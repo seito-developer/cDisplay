@@ -11,12 +11,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        statusBarController?.restoreOnTerminate()
     }
 
-    // MARK: - Dock icon click → toggle mask
+    // MARK: - Dock icon click → toggle resolution
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        statusBarController?.toggleMask()
+        statusBarController?.toggleResolution()
         return false
     }
 }

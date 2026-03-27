@@ -11,7 +11,9 @@
       "Bash(jq:*)",
       "Bash(xcodebuild -scheme cDisplay -configuration Debug build)",
       "Bash(xcodebuild -scheme cDisplay -configuration Debug -destination 'platform=macOS' build)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(xcodebuild -scheme cDisplay -configuration Debug -destination 'platform=macOS' clean build SYMROOT=/tmp/cDisplay-build)",
+      "Bash(xcodebuild test:*)"
     ]
   },
   "hooks": {
