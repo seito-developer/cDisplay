@@ -2,42 +2,21 @@ import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
-    // Temporary Hello World window — will be replaced by StatusBarController in Phase 7.
-    private var helloWindow: NSWindow?
+    private var statusBarController: StatusBarController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        showHelloWorld()
+        let controller = StatusBarController()
+        controller.setup()
+        statusBarController = controller
     }
 
     func applicationWillTerminate(_ notification: Notification) {
     }
 
-    // MARK: - Temporary Hello World
+    // MARK: - Dock icon click → toggle mask
 
-    private func showHelloWorld() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 320, height: 160),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "cDisplay"
-        window.center()
-
-        let label = NSTextField(labelWithString: "Hello, World!")
-        label.font = .systemFont(ofSize: 28, weight: .medium)
-        label.alignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-
-        let contentView = window.contentView!
-        contentView.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-        ])
-
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        helloWindow = window
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        statusBarController?.toggleMask()
+        return false
     }
 }
