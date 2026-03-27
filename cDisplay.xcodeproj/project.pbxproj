@@ -15,6 +15,10 @@
 		AA0A0000000000000000006A /* OffsetPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000AA /* OffsetPosition.swift */; };
 		AA0A0000000000000000007A /* ClickMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000BA /* ClickMode.swift */; };
 		AA0A0000000000000000008A /* DisplayInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000CA /* DisplayInfo.swift */; };
+		AA0A0000000000000000009A /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000DA /* SettingsService.swift */; };
+		AA0A000000000000000000AA /* DisplayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000EA /* DisplayService.swift */; };
+		AA0A000000000000000000BA /* SettingsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000000FA /* SettingsServiceTests.swift */; };
+		AA0A000000000000000000CA /* DisplayServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000010A /* DisplayServiceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +44,10 @@
 		AA01000000000000000000AA /* OffsetPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetPosition.swift; sourceTree = "<group>"; };
 		AA01000000000000000000BA /* ClickMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickMode.swift; sourceTree = "<group>"; };
 		AA01000000000000000000CA /* DisplayInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayInfo.swift; sourceTree = "<group>"; };
+		AA01000000000000000000DA /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
+		AA01000000000000000000EA /* DisplayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayService.swift; sourceTree = "<group>"; };
+		AA01000000000000000000FA /* SettingsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsServiceTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000010A /* DisplayServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +136,8 @@
 		AA03000000000000000000CA /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AA01000000000000000000DA /* SettingsService.swift */,
+				AA01000000000000000000EA /* DisplayService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -153,6 +163,8 @@
 			isa = PBXGroup;
 			children = (
 				AA010000000000000000006A /* cDisplayTests.swift */,
+				AA01000000000000000000FA /* SettingsServiceTests.swift */,
+				AA010000000000000000010A /* DisplayServiceTests.swift */,
 			);
 			path = cDisplayTests;
 			sourceTree = "<group>";
@@ -271,6 +283,8 @@
 				AA0A0000000000000000006A /* OffsetPosition.swift in Sources */,
 				AA0A0000000000000000007A /* ClickMode.swift in Sources */,
 				AA0A0000000000000000008A /* DisplayInfo.swift in Sources */,
+				AA0A0000000000000000009A /* SettingsService.swift in Sources */,
+				AA0A000000000000000000AA /* DisplayService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +293,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0A0000000000000000003A /* cDisplayTests.swift in Sources */,
+				AA0A000000000000000000BA /* SettingsServiceTests.swift in Sources */,
+				AA0A000000000000000000CA /* DisplayServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
