@@ -42,6 +42,20 @@ final class DisplayService {
         return MaskRects(displayRect: displayRect, maskRects: masks)
     }
 
+    /// Computes mask rects for a raw ratio value (Double).
+    func maskRectsForRatio(
+        _ targetRatio: Double,
+        offset: OffsetPosition,
+        in visibleFrame: CGRect
+    ) -> MaskRects? {
+        let screenRatio = visibleFrame.width / visibleFrame.height
+        guard abs(screenRatio - targetRatio) >= 0.01 else { return nil }
+
+        let displayRect = self.displayRect(targetRatio: targetRatio, offset: offset, in: visibleFrame)
+        let masks = buildMaskRects(displayRect: displayRect, visibleFrame: visibleFrame)
+        return MaskRects(displayRect: displayRect, maskRects: masks)
+    }
+
     // MARK: - Private helpers
 
     private func displayRect(

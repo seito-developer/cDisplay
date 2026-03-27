@@ -37,6 +37,25 @@ final class MaskService {
         fadeIn()
     }
 
+    /// Shows mask for a given aspect ratio (as a Double) within the given frame.
+    func showMaskForRatio(_ targetRatio: Double, in visibleFrame: CGRect) {
+        removePanels()
+
+        guard let maskRects = displayService.maskRectsForRatio(targetRatio, offset: .center, in: visibleFrame) else {
+            return
+        }
+
+        panels = maskRects.maskRects.map { rect in
+            let edge = guidelineEdge(for: rect, displayRect: maskRects.displayRect)
+            let panel = MaskOverlayPanel(frame: rect, guidelineEdge: edge)
+            panel.alphaValue = 0
+            panel.orderFront(nil)
+            return panel
+        }
+
+        fadeIn()
+    }
+
     func hideMask(completion: (() -> Void)? = nil) {
         guard !panels.isEmpty else {
             completion?()

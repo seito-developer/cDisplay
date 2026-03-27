@@ -48,9 +48,7 @@ final class StatusBarController {
         return menuBuilder.buildMenu(
             isActive: viewModel.isActive,
             activeMethod: viewModel.activeMethod,
-            modesForRatio: { [weak self] ar in
-                self?.viewModel.modesForAspectRatio(ar) ?? []
-            },
+            targetGroups: viewModel.targetResolutions(),
             nativeWidth: native.width,
             nativeHeight: native.height
         )
@@ -78,12 +76,8 @@ final class StatusBarController {
             self?.viewModel.toggle()
         }
 
-        menuBuilder.onSelectAspectRatio = { [weak self] ar in
-            self?.viewModel.applyAspectRatio(ar)
-        }
-
-        menuBuilder.onSelectResolution = { [weak self] mode, ar in
-            self?.viewModel.applyResolution(mode, aspectRatio: ar)
+        menuBuilder.onSelectTarget = { [weak self] target in
+            self?.viewModel.applyTarget(target)
         }
 
         menuBuilder.onQuit = {
