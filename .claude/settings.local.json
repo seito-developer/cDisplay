@@ -1,7 +1,30 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Skill(update-config)",
+      "Bash(swiftlint version:*)",
+      "Bash(swift-format --version)",
+      "Bash(xcodebuild -version)",
+      "Bash(brew install:*)",
+      "Bash(swiftlint lint:*)",
+      "Bash(jq:*)",
+      "Bash(xcodebuild -scheme cDisplay -configuration Debug build)",
+      "Bash(xcodebuild -scheme cDisplay -configuration Debug -destination 'platform=macOS' build)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath' | { read -r f; echo \"$f\" | grep -q '\\.swift$' && /opt/homebrew/bin/swiftlint lint \"$f\" 2>&1 || true; }",
+            "statusMessage": "SwiftLint..."
+          }
+        ]
+      }
     ]
   }
 }
