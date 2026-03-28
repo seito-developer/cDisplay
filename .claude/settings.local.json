@@ -18,7 +18,18 @@
       "Bash(sips:*)",
       "Bash(SRC=/Users/horiguchimasato/Downloads/icon.png)",
       "Bash(rm -f icon.png)",
-      "Bash(file:*)"
+      "Bash(file:*)",
+      "Bash(xcodebuild -scheme cDisplay -configuration Release -destination 'platform=macOS' clean build)",
+      "Bash(APP_PATH=~/Library/Developer/Xcode/DerivedData/cDisplay-dinjtgzcebvfgrclfsmuvnxpxzwe/Build/Products/Release/cDisplay.app)",
+      "Bash(codesign --force --sign \"Developer ID Application: Seito Horiguchi \\(6U882TDNB5\\)\" --options runtime --timestamp --entitlements /Users/horiguchimasato/Documents/develop/cDisplay/cDisplay/cDisplay/Supporting/cDisplay.entitlements \"$APP_PATH\")",
+      "Bash(DMG_PATH=/tmp/cDisplay_v1.0.1.dmg)",
+      "Bash(rm -f \"$DMG_PATH\")",
+      "Bash(hdiutil create:*)",
+      "Bash(codesign --verify --deep --strict ~/Library/Developer/Xcode/DerivedData/cDisplay-dinjtgzcebvfgrclfsmuvnxpxzwe/Build/Products/Release/cDisplay.app)",
+      "Bash(xcrun notarytool:*)",
+      "Bash(xcrun stapler:*)",
+      "Bash(gh release:*)",
+      "Bash(gh api:*)"
     ]
   },
   "hooks": {
