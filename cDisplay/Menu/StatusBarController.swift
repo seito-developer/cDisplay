@@ -37,6 +37,13 @@ final class StatusBarController {
         viewModel.toggle()
     }
 
+    func showMenu() {
+        guard let button = statusItem?.button else { return }
+        let menu = rebuildMenu()
+        statusItem?.menu = menu
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height), in: button)
+    }
+
     func restoreOnTerminate() {
         viewModel.restoreOnTerminate()
     }

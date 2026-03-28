@@ -326,6 +326,38 @@
       line-height: 1.65;
     }
 
+    /* ── Screenshot ── */
+    #screenshot {
+      text-align: center;
+      padding: 0 40px 80px;
+    }
+
+    #screenshot .inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .screenshot-frame {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+      display: inline-block;
+      width: 100%;
+    }
+
+    .screenshot-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .screenshot-caption {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
     /* ── Features ── */
     #features {
       background: var(--bg2);
@@ -521,6 +553,16 @@
             <p>cDisplay changes the resolution and overlays a precise black mask. Your screen instantly shows the exact framing you need.</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Screenshot -->
+    <section id="screenshot">
+      <div class="inner">
+        <div class="screenshot-frame fade-in">
+          <img src="screenshot-menu.png" alt="cDisplay menu bar — Resolution submenu showing aspect ratio groups and resolution presets" loading="lazy">
+        </div>
+        <p class="screenshot-caption fade-in">Menu bar dropdown — pick an aspect ratio and resolution in seconds.</p>
       </div>
     </section>
 

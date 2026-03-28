@@ -14,10 +14,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarController?.restoreOnTerminate()
     }
 
-    // MARK: - Dock icon click → toggle resolution
+    // MARK: - Dock icon click → open menu
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        statusBarController?.toggle()
+        statusBarController?.showMenu()
         return false
     }
 }
