@@ -34,3 +34,6 @@ Carthage/Build/
 # Archives & exports
 *.ipa
 *.xcarchive
+
+# Claude Code local settings
+.claude/settings.local.json
