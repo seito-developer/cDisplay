@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cDisplay — Display Any Aspect Ratio on macOS</title>
+  <meta name="description" content="cDisplay lets video editors, streamers, and social creators preview any aspect ratio — 16:9, 4:3, 2.39:1, 1:1, or 9:16 — directly on their Mac screen.">
+  <meta property="og:title" content="cDisplay — Display Any Aspect Ratio on macOS">
+  <meta property="og:description" content="Preview 16:9, 4:3, 2.39:1, 1:1, or 9:16 directly on your Mac. One click from the menu bar.">
+  <meta property="og:url" content="https://github.com/seito-developer/cDisplay">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <style>
+    /* ── Reset & Variables ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d0d;
+      --bg2:       #1a1a1a;
+      --text:      #f0f0f0;
+      --muted:     #888888;
+      --accent:    #4fc3f7;
+      --border:    #2a2a2a;
+      --font:      -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Fade-in animation ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+
+    .header-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--text);
+      color: #000;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .header-cta:hover { opacity: 0.85; }
+
+    /* ── Hero ── */
+    #hero {
+      text-align: center;
+      padding: 100px 40px 80px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    #hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    #hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    #hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--text);
+      color: #000;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 30px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-download:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* ── Screen mockup ── */
+    .mockup-wrap {
+      margin: 60px auto 0;
+      max-width: 640px;
+      position: relative;
+    }
+
+    .screen {
+      width: 100%;
+      aspect-ratio: 16/10;
+      background: #111;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    }
+
+    /* Content area (simulated desktop) */
+    .screen-content {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1c2b3a 0%, #0f1923 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen-content-inner {
+      width: 60%;
+      height: 50%;
+      border: 1px dashed rgba(79,195,247,0.3);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(79,195,247,0.4);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Mask overlays */
+    .mask-top, .mask-bottom, .mask-left, .mask-right {
+      position: absolute;
+      background: rgba(0,0,0,0.88);
+      transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .mask-top    { top: 0; left: 0; right: 0; }
+    .mask-bottom { bottom: 0; left: 0; right: 0; }
+    .mask-left   { top: 0; bottom: 0; left: 0; }
+    .mask-right  { top: 0; bottom: 0; right: 0; }
+
+    /* Ratio label */
+    .ratio-label {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(79,195,247,0.15);
+      border: 1px solid rgba(79,195,247,0.4);
+      color: var(--accent);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      transition: opacity 0.3s;
+    }
+
+    /* Notch */
+    .screen::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 18px;
+      background: #000;
+      border-radius: 0 0 12px 12px;
+      z-index: 10;
+    }
+
+    /* ── Section common ── */
+    section {
+      padding: 80px 40px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      max-width: 520px;
+      margin-bottom: 56px;
+    }
+
+    /* ── Who It's For ── */
+    #for-whom {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #for-whom .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 28px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--accent); }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(79,195,247,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .card-icon svg { width: 22px; height: 22px; fill: var(--accent); }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── How It Works ── */
+    #how-it-works .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      counter-reset: step;
+    }
+
+    .step {
+      counter-increment: step;
+      position: relative;
+      padding-left: 0;
+    }
+
+    .step-num {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Features ── */
+    #features {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #features .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px 48px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feature-item svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+      width: 16px;
+      height: 16px;
+      fill: var(--accent);
+    }
+
+    .feature-item span {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    /* ── Support ── */
+    #support {
+      text-align: center;
+      padding: 100px 40px;
+    }
+
+    #support .inner {
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    #support .section-sub { margin: 0 auto 40px; }
+
+    .btn-coffee {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFDD00;
+      color: #000;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 30px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-coffee:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 40px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    footer a {
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: var(--text); }
+
+    footer .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; }
+      section { padding: 60px 20px; }
+      #hero { padding: 72px 20px 60px; }
+      #support { padding: 72px 20px; }
+
+      .cards { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; gap: 40px; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">c<span>Display</span></div>
+    <a href="https://github.com/seito-developer/cDisplay/releases/latest/download/cDisplay_v1.0.1.dmg" class="header-cta" aria-label="Download cDisplay DMG">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zm-8 2V5h2v6h1.17L12 13.17 9.83 11H11zm-6 7h14v2H5v-2z"/></svg>
+      Download for Mac
+    </a>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section id="hero">
+      <h1 class="fade-in">Display <em>Any Aspect Ratio.</em><br>Instantly.</h1>
+      <p class="fade-in">cDisplay applies a black mask overlay to your Mac screen, letting you preview 16:9, 4:3, 2.39:1, 1:1, or 9:16 — without leaving your workflow.</p>
+      <a href="https://github.com/seito-developer/cDisplay/releases/latest/download/cDisplay_v1.0.1.dmg" class="btn-download fade-in" aria-label="Download cDisplay for Mac">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zm-8 2V5h2v6h1.17L12 13.17 9.83 11H11zm-6 7h14v2H5v-2z"/></svg>
+        Download for Mac — Free
+      </a>
+
+      <div class="mockup-wrap fade-in">
+        <div class="screen">
+          <div class="screen-content">
+            <div class="screen-content-inner" aria-hidden="true">YOUR CONTENT</div>
+          </div>
+          <div class="mask-top"    id="mt" aria-hidden="true"></div>
+          <div class="mask-bottom" id="mb" aria-hidden="true"></div>
+          <div class="mask-left"   id="ml" aria-hidden="true"></div>
+          <div class="mask-right"  id="mr" aria-hidden="true"></div>
+          <div class="ratio-label" id="rl" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who It's For -->
+    <section id="for-whom">
+      <div class="inner">
+        <p class="section-label fade-in">Who It's For</p>
+        <h2 class="section-title fade-in">Built for creators who care about framing.</h2>
+        <p class="section-sub fade-in">Whether you're editing a film, going live on Twitch, or producing for TikTok — cDisplay shows you exactly what your audience will see.</p>
+        <div class="cards">
+          <div class="card fade-in">
+            <div class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 3H6C4.34 3 3 4.34 3 6v12c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3zm-5 14l-5-4 5-4v8z"/></svg>
+            </div>
+            <h3>Video Editors</h3>
+            <p>Preview cinematic ratios — 2.39:1, 4:3, 16:9 — directly on your desktop while editing in Final Cut Pro, Premiere, or DaVinci Resolve.</p>
+          </div>
+          <div class="card fade-in">
+            <div class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <h3>Live Streamers</h3>
+            <p>Confirm your OBS output looks exactly right in 16:9 before going live. Capture precisely what your audience sees — no guesswork.</p>
+          </div>
+          <div class="card fade-in">
+            <div class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+            </div>
+            <h3>Social Creators</h3>
+            <p>See how your content looks in 9:16 for TikTok &amp; Reels, or 1:1 for Instagram — on your actual Mac screen, before you export.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works">
+      <div class="inner">
+        <p class="section-label fade-in">How It Works</p>
+        <h2 class="section-title fade-in">Three clicks. Zero friction.</h2>
+        <p class="section-sub fade-in">cDisplay lives in your menu bar and stays out of the way until you need it.</p>
+        <div class="steps">
+          <div class="step fade-in">
+            <div class="step-num">01</div>
+            <h3>Click the menu bar icon</h3>
+            <p>cDisplay runs as a lightweight menu bar app. Always accessible, never cluttering your Dock or workspace.</p>
+          </div>
+          <div class="step fade-in">
+            <div class="step-num">02</div>
+            <h3>Choose your aspect ratio</h3>
+            <p>Pick from 16:9, 4:3, 2.39:1, 1:1, or 9:16. Multiple resolution presets available for each ratio.</p>
+          </div>
+          <div class="step fade-in">
+            <div class="step-num">03</div>
+            <h3>Your display adapts</h3>
+            <p>cDisplay changes the resolution and overlays a precise black mask. Your screen instantly shows the exact framing you need.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <div class="inner">
+        <p class="section-label fade-in">Features</p>
+        <h2 class="section-title fade-in">Everything you need. Nothing you don't.</h2>
+        <p class="section-sub fade-in">Designed to be simple, reliable, and unobtrusive.</p>
+        <div class="feature-grid">
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>Hybrid mode — resolution change + black mask overlay for pixel-perfect framing</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>5 aspect ratios: 16:9, 4:3, 2.39:1, 1:1, 9:16 — with multiple resolution presets each</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>Top / Center / Bottom offset positioning</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>Works with OBS, Final Cut Pro, DaVinci Resolve, and any screen capture tool</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>Smooth 0.25s fade animation — no jarring transitions</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>Crash recovery — display settings are always automatically restored</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>No screen recording permission required — your privacy is protected</span>
+          </div>
+          <div class="feature-item fade-in">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>macOS 14 Sonoma and later · Free download · No subscription</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Support -->
+    <section id="support">
+      <div class="inner">
+        <p class="section-label fade-in">Support</p>
+        <h2 class="section-title fade-in">Like cDisplay?</h2>
+        <p class="section-sub fade-in">cDisplay is a one-person project. If it saves you time in your workflow, a coffee is always appreciated — and helps keep development going.</p>
+        <a href="https://buymeacoffee.com/seito/e/524183" target="_blank" rel="noopener noreferrer" class="btn-coffee fade-in" aria-label="Support cDisplay on Buy Me a Coffee">
+          ☕ Buy Me a Coffee
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-row">
+      <span>cDisplay &copy; 2026</span>
+      <span>macOS 14+</span>
+      <a href="https://github.com/seito-developer/cDisplay/releases" target="_blank" rel="noopener">GitHub Releases</a>
+      <a href="#" aria-label="Privacy Policy">Privacy Policy</a>
+    </div>
+  </footer>
+
+  <script>
+    // ── Scroll fade-in ──
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // ── Hero mockup: cycle through aspect ratios ──
+    const mt = document.getElementById('mt');
+    const mb = document.getElementById('mb');
+    const ml = document.getElementById('ml');
+    const mr = document.getElementById('mr');
+    const rl = document.getElementById('rl');
+
+    // Each ratio: [topPct, bottomPct, leftPct, rightPct, label]
+    // Values are percentage of screen height/width to mask
+    const ratios = [
+      { top: '21%', bottom: '21%', left: '0',    right: '0',    left2: '0', right2: '0', label: '2.39:1  Cinematic' },
+      { top: '0',   bottom: '0',   left: '12.5%', right: '12.5%', label: '4:3  Classic' },
+      { top: '0',   bottom: '0',   left: '0',    right: '0',    label: '16:9  Widescreen' },
+      { top: '0',   bottom: '0',   left: '22%',  right: '22%',  label: '1:1  Square' },
+      { top: '0',   bottom: '0',   left: '34%',  right: '34%',  label: '9:16  Vertical' },
+    ];
+
+    let idx = 0;
+
+    function applyRatio(r) {
+      mt.style.height  = r.top    || '0';
+      mb.style.height  = r.bottom || '0';
+      ml.style.width   = r.left   || '0';
+      mr.style.width   = r.right  || '0';
+      rl.textContent   = r.label;
+    }
+
+    applyRatio(ratios[0]);
+
+    setInterval(() => {
+      idx = (idx + 1) % ratios.length;
+      applyRatio(ratios[idx]);
+    }, 2000);
+  </script>
+</body>
+</html>
