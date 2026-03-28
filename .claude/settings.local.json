@@ -17,7 +17,8 @@
       "Bash(xargs ls:*)",
       "Bash(sips:*)",
       "Bash(SRC=/Users/horiguchimasato/Downloads/icon.png)",
-      "Bash(rm -f icon.png)"
+      "Bash(rm -f icon.png)",
+      "Bash(file:*)"
     ]
   },
   "hooks": {
