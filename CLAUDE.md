@@ -1,6 +1,6 @@
 # cDisplay
 
-macOSデスクトップアプリ。黒いマスク（レターボックス/ピラーボックス）を画面に重ねて、任意のアスペクト比の疑似表示領域を作成する。
+macOSデスクトップアプリ。OSの表示解像度変更と黒いマスク（レターボックス/ピラーボックス）オーバーレイを組み合わせたハイブリッド方式で、任意のアスペクト比の表示領域を作成する。
 
 仕様書: [docs/SPEC.md](docs/SPEC.md)
 
@@ -33,6 +33,7 @@ xcodebuild test -scheme cDisplay
 - パターン: MVVM-lite（Views + ViewModels、重量フレームワーク不使用）
 - ライフサイクル: AppDelegate方式（SwiftUI Appではない）
 - メニューバー: NSStatusItem + NSMenu
+- 解像度変更: CoreGraphics（CGDisplaySetDisplayMode）
 - マスク描画: NSPanel（floating、non-activating）
 - 設定保存: UserDefaults（MAS Sandbox互換）
 - サードパーティ依存: なし
@@ -53,11 +54,11 @@ xcodebuild test -scheme cDisplay
 ```
 cDisplay/
   App/              -- AppDelegate、アプリライフサイクル
-  Models/           -- AspectRatio、DisplayInfo、Settings 等の列挙型・構造体
-  ViewModels/       -- MaskViewModel、MenuViewModel
-  Views/            -- MaskOverlayPanel、OnboardingWindow
+  Models/           -- AspectRatio、OffsetPosition、DisplayInfo 等の値型
+  ViewModels/       -- DisplayModeViewModel（ハイブリッド表示ロジック）
+  Views/            -- MaskOverlayPanel、MaskPanelView
   Menu/             -- StatusBarController、MenuBuilder
-  Services/         -- DisplayService、MaskService、SettingsService
+  Services/         -- DisplayModeService、DisplayService、MaskService、SettingsService
   Resources/        -- Assets.xcassets、メニューバーアイコン
   Supporting/       -- Info.plist、Entitlements
 ```
