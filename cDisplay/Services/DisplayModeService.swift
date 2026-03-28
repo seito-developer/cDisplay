@@ -177,6 +177,76 @@ final class DisplayModeService {
         defaults.removeObject(forKey: crashRecoveryModeIDKey)
     }
 
+    // MARK: - Target Resolutions
+
+    /// Common target resolutions users may want, even if not natively available.
+    static let targetResolutions: [(width: Int, height: Int, label: String)] = [
+        // 16:9
+        (1920, 1080, "16:9"), (1600, 900, "16:9"), (1280, 720, "16:9"),
+        // 4:3
+        (1600, 1200, "4:3"), (1280, 960, "4:3"), (1024, 768, "4:3"), (800, 600, "4:3"),
+        // 2.39:1
+        (1920, 803, "2.39:1"), (1280, 535, "2.39:1"),
+        // 1:1
+        (1080, 1080, "1:1"), (960, 960, "1:1"), (720, 720, "1:1"),
+        // 9:16
+        (608, 1080, "9:16"), (405, 720, "9:16"),
+    ]
+
+    /// Finds the best available display mode to approximate the target resolution.
+    /// Prefers: same or larger size, closest aspect ratio, then closest area.
+    func closestMode(toWidth tw: Int, toHeight th: Int) -> DisplayMode? {
+        let allGroups = availableModeGroups()
+        let allModes = allGroups.flatMap(\.modes)
+        guard !allModes.isEmpty else { return nil }
+
+        let targetRatio = Double(tw) / Double(th)
+
+        // Score: prefer modes whose ratio is closest, then whose area is closest but >= target
+        return allModes.min { a, b in
+            let aRatio = Double(a.width) / Double(a.height)
+            let bRatio = Double(b.width) / Double(b.height)
+            let aRatioDiff = abs(aRatio - targetRatio)
+            let bRatioDiff = abs(bRatio - targetRatio)
+
+            // Primary: closest aspect ratio
+            if abs(aRatioDiff - bRatioDiff) > 0.01 {
+                return aRatioDiff < bRatioDiff
+            }
+            // Secondary: closest area (prefer >= target)
+            let targetArea = tw * th
+            let aDiff = a.width * a.height - targetArea
+            let bDiff = b.width * b.height - targetArea
+            if aDiff >= 0 && bDiff < 0 { return true }
+            if aDiff < 0 && bDiff >= 0 { return false }
+            return abs(aDiff) < abs(bDiff)
+        }
+    }
+
+    // MARK: - Aspect Ratio Matching
+
+    /// Returns display modes matching the given aspect ratio (within tolerance).
+    func modesMatching(aspectRatio: AspectRatio) -> [DisplayMode] {
+        let target = aspectRatio.ratio
+        let tolerance = 0.02
+        let groups = availableModeGroups()
+        var matches: [DisplayMode] = []
+        for group in groups {
+            for mode in group.modes {
+                let modeRatio = Double(mode.width) / Double(mode.height)
+                if abs(modeRatio - target) < tolerance {
+                    matches.append(mode)
+                }
+            }
+        }
+        return matches.sorted { $0.width > $1.width }
+    }
+
+    /// Returns true if at least one display mode matches the given aspect ratio.
+    func hasMatchingMode(for aspectRatio: AspectRatio) -> Bool {
+        !modesMatching(aspectRatio: aspectRatio).isEmpty
+    }
+
     // MARK: - Helpers
 
     private func aspectRatioLabel(width: Int, height: Int) -> String {

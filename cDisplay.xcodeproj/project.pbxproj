@@ -18,6 +18,12 @@
 		AA0A00000000000000000120 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000016A /* StatusBarController.swift */; };
 		AA0A00000000000000000130 /* DisplayModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000017A /* DisplayModeService.swift */; };
 		AA0A00000000000000000140 /* DisplayModeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000018A /* DisplayModeViewModel.swift */; };
+		AA0A00000000000000000150 /* AspectRatio.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000019A /* AspectRatio.swift */; };
+		AA0A00000000000000000160 /* OffsetPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000001AA /* OffsetPosition.swift */; };
+		AA0A00000000000000000170 /* DisplayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000001BA /* DisplayService.swift */; };
+		AA0A00000000000000000180 /* MaskService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000001CA /* MaskService.swift */; };
+		AA0A00000000000000000190 /* MaskOverlayPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000001DA /* MaskOverlayPanel.swift */; };
+		AA0A000000000000000001A0 /* MaskPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000000000000000001EA /* MaskPanelView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +52,12 @@
 		AA010000000000000000016A /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		AA010000000000000000017A /* DisplayModeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayModeService.swift; sourceTree = "<group>"; };
 		AA010000000000000000018A /* DisplayModeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayModeViewModel.swift; sourceTree = "<group>"; };
+		AA010000000000000000019A /* AspectRatio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AspectRatio.swift; sourceTree = "<group>"; };
+		AA01000000000000000001AA /* OffsetPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetPosition.swift; sourceTree = "<group>"; };
+		AA01000000000000000001BA /* DisplayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayService.swift; sourceTree = "<group>"; };
+		AA01000000000000000001CA /* MaskService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskService.swift; sourceTree = "<group>"; };
+		AA01000000000000000001DA /* MaskOverlayPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskOverlayPanel.swift; sourceTree = "<group>"; };
+		AA01000000000000000001EA /* MaskPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaskPanelView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +93,7 @@
 				AA030000000000000000003A /* App */,
 				AA030000000000000000008A /* Models */,
 				AA030000000000000000009A /* ViewModels */,
+				AA03000000000000000000AA /* Views */,
 				AA03000000000000000000BA /* Menu */,
 				AA03000000000000000000CA /* Services */,
 				AA030000000000000000005A /* Resources */,
@@ -102,6 +115,8 @@
 			isa = PBXGroup;
 			children = (
 				AA01000000000000000000CA /* DisplayInfo.swift */,
+				AA010000000000000000019A /* AspectRatio.swift */,
+				AA01000000000000000001AA /* OffsetPosition.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -112,6 +127,15 @@
 				AA010000000000000000018A /* DisplayModeViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AA03000000000000000000AA /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA01000000000000000001DA /* MaskOverlayPanel.swift */,
+				AA01000000000000000001EA /* MaskPanelView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		AA03000000000000000000BA /* Menu */ = {
@@ -128,6 +152,8 @@
 			children = (
 				AA01000000000000000000DA /* SettingsService.swift */,
 				AA010000000000000000017A /* DisplayModeService.swift */,
+				AA01000000000000000001BA /* DisplayService.swift */,
+				AA01000000000000000001CA /* MaskService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -274,6 +300,12 @@
 				AA0A00000000000000000140 /* DisplayModeViewModel.swift in Sources */,
 				AA0A00000000000000000110 /* MenuBuilder.swift in Sources */,
 				AA0A00000000000000000120 /* StatusBarController.swift in Sources */,
+				AA0A00000000000000000150 /* AspectRatio.swift in Sources */,
+				AA0A00000000000000000160 /* OffsetPosition.swift in Sources */,
+				AA0A00000000000000000170 /* DisplayService.swift in Sources */,
+				AA0A00000000000000000180 /* MaskService.swift in Sources */,
+				AA0A00000000000000000190 /* MaskOverlayPanel.swift in Sources */,
+				AA0A000000000000000001A0 /* MaskPanelView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

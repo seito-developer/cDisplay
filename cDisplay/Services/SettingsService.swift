@@ -9,8 +9,12 @@ final class SettingsService {
     // MARK: - Keys
 
     private enum Key {
-        static let selectedModeID   = "selectedModeID"
-        static let keyboardShortcut = "keyboardShortcut"
+        static let selectedAspectRatio = "selectedAspectRatio"
+        static let selectedModeID      = "selectedModeID"
+        static let selectedTargetW     = "selectedTargetW"
+        static let selectedTargetH     = "selectedTargetH"
+        static let selectedTargetLabel = "selectedTargetLabel"
+        static let keyboardShortcut    = "keyboardShortcut"
     }
 
     // MARK: - Defaults
@@ -21,6 +25,25 @@ final class SettingsService {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+    }
+
+    // MARK: - Selected Aspect Ratio
+
+    var selectedAspectRatio: AspectRatio? {
+        get {
+            guard let raw = defaults.string(forKey: Key.selectedAspectRatio),
+                  let value = AspectRatio(rawValue: raw) else {
+                return nil
+            }
+            return value
+        }
+        set {
+            if let value = newValue {
+                defaults.set(value.rawValue, forKey: Key.selectedAspectRatio)
+            } else {
+                defaults.removeObject(forKey: Key.selectedAspectRatio)
+            }
+        }
     }
 
     // MARK: - Selected Mode ID
@@ -40,6 +63,29 @@ final class SettingsService {
         }
     }
 
+    // MARK: - Selected Target
+
+    var selectedTarget: TargetResolution? {
+        get {
+            guard defaults.object(forKey: Key.selectedTargetW) != nil else { return nil }
+            let w = defaults.integer(forKey: Key.selectedTargetW)
+            let h = defaults.integer(forKey: Key.selectedTargetH)
+            let label = defaults.string(forKey: Key.selectedTargetLabel) ?? ""
+            return TargetResolution(width: w, height: h, aspectLabel: label)
+        }
+        set {
+            if let t = newValue {
+                defaults.set(t.width, forKey: Key.selectedTargetW)
+                defaults.set(t.height, forKey: Key.selectedTargetH)
+                defaults.set(t.aspectLabel, forKey: Key.selectedTargetLabel)
+            } else {
+                defaults.removeObject(forKey: Key.selectedTargetW)
+                defaults.removeObject(forKey: Key.selectedTargetH)
+                defaults.removeObject(forKey: Key.selectedTargetLabel)
+            }
+        }
+    }
+
     // MARK: - Keyboard Shortcut
 
     var keyboardShortcut: String {
@@ -52,7 +98,9 @@ final class SettingsService {
     // MARK: - Reset
 
     func reset() {
-        [Key.selectedModeID, Key.keyboardShortcut].forEach {
+        [Key.selectedAspectRatio, Key.selectedModeID,
+         Key.selectedTargetW, Key.selectedTargetH, Key.selectedTargetLabel,
+         Key.keyboardShortcut].forEach {
             defaults.removeObject(forKey: $0)
         }
     }

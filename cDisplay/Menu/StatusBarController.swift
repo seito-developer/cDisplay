@@ -7,7 +7,6 @@ final class StatusBarController {
     private var statusItem: NSStatusItem?
     private let menuBuilder = MenuBuilder()
     private let viewModel: DisplayModeViewModel
-    private let displayModeService: DisplayModeService
 
     private static let iconOff = "rectangle.dashed"
     private static let iconOn  = "rectangle.fill"
@@ -16,7 +15,6 @@ final class StatusBarController {
 
     init(displayModeService: DisplayModeService = DisplayModeService(),
          settings: SettingsService = .shared) {
-        self.displayModeService = displayModeService
         self.viewModel = DisplayModeViewModel(displayModeService: displayModeService, settings: settings)
     }
 
@@ -35,18 +33,12 @@ final class StatusBarController {
 
     // MARK: - Public
 
-    func toggleResolution() {
-        viewModel.toggleResolution()
+    func toggle() {
+        viewModel.toggle()
     }
 
     func restoreOnTerminate() {
-        if viewModel.isResolutionChanged {
-            viewModel.restoreOriginalMode()
-        }
-    }
-
-    var isResolutionChanged: Bool {
-        viewModel.isResolutionChanged
+        viewModel.restoreOnTerminate()
     }
 
     // MARK: - Menu
@@ -54,9 +46,9 @@ final class StatusBarController {
     private func rebuildMenu() -> NSMenu {
         let native = viewModel.nativeResolution()
         return menuBuilder.buildMenu(
-            isResolutionChanged: viewModel.isResolutionChanged,
-            activeMode: viewModel.activeMode,
-            modeGroups: viewModel.availableModeGroups(),
+            isActive: viewModel.isActive,
+            activeMethod: viewModel.activeMethod,
+            targetGroups: viewModel.targetResolutions(),
             nativeWidth: native.width,
             nativeHeight: native.height
         )
@@ -80,12 +72,12 @@ final class StatusBarController {
     // MARK: - Bindings
 
     private func bindMenuCallbacks() {
-        menuBuilder.onToggleResolution = { [weak self] in
-            self?.viewModel.toggleResolution()
+        menuBuilder.onToggle = { [weak self] in
+            self?.viewModel.toggle()
         }
 
-        menuBuilder.onSelectResolution = { [weak self] mode in
-            self?.viewModel.applyMode(mode)
+        menuBuilder.onSelectTarget = { [weak self] target in
+            self?.viewModel.applyTarget(target)
         }
 
         menuBuilder.onQuit = {

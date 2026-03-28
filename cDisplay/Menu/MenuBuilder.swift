@@ -6,28 +6,25 @@ final class MenuBuilder {
 
     // MARK: - Callbacks
 
-    var onToggleResolution: (() -> Void)?
-    var onSelectResolution: ((DisplayMode) -> Void)?
+    var onToggle: (() -> Void)?
+    var onSelectTarget: ((TargetResolution) -> Void)?
     var onQuit: (() -> Void)?
 
     // MARK: - Build
 
     func buildMenu(
-        isResolutionChanged: Bool,
-        activeMode: DisplayMode?,
-        modeGroups: [DisplayModeGroup],
+        isActive: Bool,
+        activeMethod: DisplayMethod?,
+        targetGroups: [String: [TargetResolution]],
         nativeWidth: Int,
         nativeHeight: Int
     ) -> NSMenu {
         let menu = NSMenu()
 
-        // 1. Toggle resolution
-        let toggleTitle = isResolutionChanged ? "Disable Resolution" : "Enable Resolution"
+        // 1. Toggle
+        let toggleTitle = isActive ? "Disable" : "Enable"
         let toggleItem = NSMenuItem(title: toggleTitle, action: #selector(toggleAction(_:)), keyEquivalent: "")
         toggleItem.target = self
-        if !isResolutionChanged && activeMode == nil {
-            // No mode selected yet — disable toggle until user picks one
-        }
         menu.addItem(toggleItem)
 
         menu.addItem(.separator())
@@ -36,23 +33,29 @@ final class MenuBuilder {
         let resItem = NSMenuItem(title: "Resolution", action: nil, keyEquivalent: "")
         let resMenu = NSMenu()
 
-        for group in modeGroups {
+        let groupOrder = ["16:9", "4:3", "2.39:1", "1:1", "9:16"]
+        for label in groupOrder {
+            guard let targets = targetGroups[label], !targets.isEmpty else { continue }
+
             // Section header
-            let header = NSMenuItem(title: group.label, action: nil, keyEquivalent: "")
+            let header = NSMenuItem(title: label, action: nil, keyEquivalent: "")
             header.isEnabled = false
             resMenu.addItem(header)
 
-            for mode in group.modes {
-                var title = mode.displayName
-                if mode.width == nativeWidth && mode.height == nativeHeight {
-                    title += " (native)"
-                }
-                let item = NSMenuItem(title: "    " + title, action: #selector(selectResolutionAction(_:)), keyEquivalent: "")
+            for target in targets {
+                let item = NSMenuItem(
+                    title: "    \(target.displayName)",
+                    action: #selector(selectTargetAction(_:)),
+                    keyEquivalent: ""
+                )
                 item.target = self
-                item.representedObject = ModeWrapper(mode: mode)
-                if let active = activeMode, active == mode {
+                item.representedObject = TargetWrapper(target: target)
+
+                // Checkmark for active target
+                if let active = activeTarget(from: activeMethod), active == target {
                     item.state = .on
                 }
+
                 resMenu.addItem(item)
             }
         }
@@ -64,17 +67,23 @@ final class MenuBuilder {
 
         // 3. Display info
         let nativeItem = NSMenuItem(
-            title: "Display: \(nativeWidth) × \(nativeHeight) (native)",
+            title: "Display: \(nativeWidth) × \(nativeHeight)",
             action: nil, keyEquivalent: ""
         )
         nativeItem.isEnabled = false
         menu.addItem(nativeItem)
 
-        if let active = activeMode {
-            let activeItem = NSMenuItem(
-                title: "Active: \(active.width) × \(active.height)",
-                action: nil, keyEquivalent: ""
-            )
+        if let activeMethod {
+            let desc: String
+            switch activeMethod {
+            case .resolution(let mode):
+                desc = "Active: \(mode.width) × \(mode.height)"
+            case .mask(let ar):
+                desc = "Active: \(ar.displayName) (mask)"
+            case .resolutionPlusMask(let mode, let target):
+                desc = "Active: \(target.displayName) (via \(mode.width)×\(mode.height) + mask)"
+            }
+            let activeItem = NSMenuItem(title: desc, action: nil, keyEquivalent: "")
             activeItem.isEnabled = false
             menu.addItem(activeItem)
         }
@@ -96,15 +105,26 @@ final class MenuBuilder {
         return menu
     }
 
+    // MARK: - Helpers
+
+    private func activeTarget(from method: DisplayMethod?) -> TargetResolution? {
+        switch method {
+        case .resolutionPlusMask(_, let target): return target
+        case .mask(let ar):
+            return TargetResolution(width: 0, height: 0, aspectLabel: ar.rawValue)
+        default: return nil
+        }
+    }
+
     // MARK: - Actions
 
     @objc private func toggleAction(_ sender: NSMenuItem) {
-        onToggleResolution?()
+        onToggle?()
     }
 
-    @objc private func selectResolutionAction(_ sender: NSMenuItem) {
-        guard let wrapper = sender.representedObject as? ModeWrapper else { return }
-        onSelectResolution?(wrapper.mode)
+    @objc private func selectTargetAction(_ sender: NSMenuItem) {
+        guard let wrapper = sender.representedObject as? TargetWrapper else { return }
+        onSelectTarget?(wrapper.target)
     }
 
     @objc private func quitAction(_ sender: NSMenuItem) {
@@ -112,8 +132,7 @@ final class MenuBuilder {
     }
 }
 
-/// Wraps DisplayMode for use as NSMenuItem.representedObject (must be AnyObject).
-private final class ModeWrapper: NSObject {
-    let mode: DisplayMode
-    init(mode: DisplayMode) { self.mode = mode }
+private final class TargetWrapper: NSObject {
+    let target: TargetResolution
+    init(target: TargetResolution) { self.target = target }
 }
