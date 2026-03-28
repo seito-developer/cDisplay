@@ -14,7 +14,10 @@
       "Bash(gh pr:*)",
       "Bash(xcodebuild -scheme cDisplay -configuration Debug -destination 'platform=macOS' clean build SYMROOT=/tmp/cDisplay-build)",
       "Bash(xcodebuild test:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(sips:*)",
+      "Bash(SRC=/Users/horiguchimasato/Downloads/icon.png)",
+      "Bash(rm -f icon.png)"
     ]
   },
   "hooks": {
